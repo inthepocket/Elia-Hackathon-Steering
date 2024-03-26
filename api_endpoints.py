@@ -61,8 +61,14 @@ async def calculate_roof_price_per_quarter(request: Request):
     percent_of_quarters_needed_comfort = ev_charging_quarters_count_comfort / total_quarters_count
     percent_of_quarters_needed_max = ev_charging_quarters_count_max / total_quarters_count
 
-    ic(percent_of_quarters_needed_comfort)
-    ic(percent_of_quarters_needed_max)
+    ic(percent_of_quarters_needed_comfort, percent_of_quarters_needed_max)
+
+    # TODO this to be checked
+    percent_of_quarters_needed_comfort = percent_of_quarters_needed_comfort * (1 + buffer)
+    percent_of_quarters_needed_max = percent_of_quarters_needed_max * (1 + buffer)
+
+    ic(percent_of_quarters_needed_comfort, percent_of_quarters_needed_max)
+
 
     df['is_in_lowest_quarters_comfort'] = df[price_column_name] <= df[price_column_name].quantile(percent_of_quarters_needed_comfort)
     df['is_in_lowest_quarters_max'] = df[price_column_name] <= df[price_column_name].quantile(percent_of_quarters_needed_max)
@@ -82,3 +88,4 @@ async def calculate_roof_price_per_quarter(request: Request):
         "roof_comfort": highest_price_in_lowest_quarters_comfort,
         "roof_max": highest_price_in_lowest_quarters_max
     }
+
