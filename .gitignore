@@ -63,5 +63,4 @@ docs/_build/
 .env
 
 # Data
-data/
 jsons/

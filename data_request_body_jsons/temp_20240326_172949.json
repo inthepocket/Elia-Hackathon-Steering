@@ -1,0 +1,19 @@
+{
+    "time_series_data": [
+        {
+            "DateTime": "2024-03-26T06:15:00+01:00",
+            "Negative imbalance price": -8.79
+        },
+        {
+            "DateTime": "2024-03-26T06:00:00+01:00",
+            "Negative imbalance price": 151.55
+        },
+        {
+            "DateTime": "2024-03-26T05:45:00+01:00",
+            "Negative imbalance price": 139.37
+        }
+    ],
+    "ev_comfort_charge_capacity_kwh": 0,
+    "ev_max_charge_capacity_kwh": 0,
+    "buffer": 0.0
+}
