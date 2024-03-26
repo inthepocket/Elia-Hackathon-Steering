@@ -30,6 +30,10 @@ async def process(request: Request):
 
 @router.post("/calculate_roof_price_per_quarter")
 async def calculate_roof_price_per_quarter(request: Request):
+
+    # price_column_name = "Negative imbalance price"
+    price_column_name = "price"
+
     body_dict = await request.json()
     
     df = pd.json_normalize(body_dict.get("time_series_data"))
@@ -60,14 +64,14 @@ async def calculate_roof_price_per_quarter(request: Request):
     ic(percent_of_quarters_needed_comfort)
     ic(percent_of_quarters_needed_max)
 
-    df['is_in_lowest_quarters_comfort'] = df['Negative imbalance price'] <= df['Negative imbalance price'].quantile(percent_of_quarters_needed_comfort)
-    df['is_in_lowest_quarters_max'] = df['Negative imbalance price'] <= df['Negative imbalance price'].quantile(percent_of_quarters_needed_max)
+    df['is_in_lowest_quarters_comfort'] = df[price_column_name] <= df[price_column_name].quantile(percent_of_quarters_needed_comfort)
+    df['is_in_lowest_quarters_max'] = df[price_column_name] <= df[price_column_name].quantile(percent_of_quarters_needed_max)
 
     pd.set_option('display.max_rows', None)
     print(df)
 
-    highest_price_in_lowest_quarters_comfort = df[df['is_in_lowest_quarters_comfort']]['Negative imbalance price'].max()
-    highest_price_in_lowest_quarters_max = df[df['is_in_lowest_quarters_max']]['Negative imbalance price'].max()
+    highest_price_in_lowest_quarters_comfort = df[df['is_in_lowest_quarters_comfort']][price_column_name].max()
+    highest_price_in_lowest_quarters_max = df[df['is_in_lowest_quarters_max']][price_column_name].max()
 
     # TODO room for improvement here, it could be somewhere between highest_price_in_lowest_quarters_comfort
     #      (if that's below 0) and highest_price_in_lowest_quarters_max
