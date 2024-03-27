@@ -65,3 +65,7 @@ docs/_build/
 # Data
 jsons/
 data_assets/
+data_assets_reformatted/
+
+# ML models
+models/
