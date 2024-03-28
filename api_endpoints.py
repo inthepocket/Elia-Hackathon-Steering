@@ -1,3 +1,4 @@
+import os
 import json
 import datetime
 from typing import Union, List
@@ -7,6 +8,11 @@ from pydantic import BaseModel
 import pandas as pd
 from icecream import ic
 
+from openai import OpenAI
+import openai
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI()
 
 router = APIRouter()
 
@@ -77,6 +83,13 @@ async def calculate_roof_price_per_quarter(request: Request):
     highest_price_in_lowest_hours_comfort = df[df['is_in_lowest_hours_comfort']][price_column_name].max()
     highest_price_in_lowest_hours_max = df[df['is_in_lowest_hours_max']][price_column_name].max()
 
+    try:
+        last_hour_comfort = int(df[df['is_in_lowest_hours_comfort']].index[-1])
+        last_hour_max = int(df[df['is_in_lowest_hours_max']].index[-1])
+    except IndexError:
+        last_hour_comfort = 0
+        last_hour_max = 0
+
     # TODO room for improvement here, it could be somewhere between highest_price_in_lowest_quarters_comfort
     #      (if that's below 0) and highest_price_in_lowest_quarters_max
     if highest_price_in_lowest_hours_max > 0:
@@ -84,6 +97,36 @@ async def calculate_roof_price_per_quarter(request: Request):
 
     return {
         "roof_comfort": highest_price_in_lowest_hours_comfort,
-        "roof_max": highest_price_in_lowest_hours_max
+        "roof_max": highest_price_in_lowest_hours_max,
+        "last_hour_comfort": last_hour_comfort,
+        "last_hour_max": last_hour_max
     }
+
+
+
+
+
+def openai_call_wrapper(messages):
+    response = client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        messages=messages,
+        temperature=1.0,
+    )
+    return response.choices[0].message.content
+
+
+@router.post("/boomerise_it")
+async def boomerise_it(request: Request):
+    body_dict = await request.json()
+    
+    energy_kwh = int(body_dict.get("energy_kwh"))
+    
+    prompt = f"How would you convert {energy_kwh} kWh into a unit of energy that boomers would understand? E.g., for millennials it would be how many tamagochis they could charge. Make it short and funny, something that would be in an app. Return just the copy. It should be max one sentence."
+
+    response = openai_call_wrapper([{"role": "system", "content": prompt}])
+
+    return response
+
+
+
 
